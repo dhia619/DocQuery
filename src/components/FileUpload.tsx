@@ -6,11 +6,16 @@ import axios from "axios";
 import { useDropzone } from "react-dropzone";
 import { toast } from "@/hooks/use-toast";
 import { ToastAction } from "./ui/toast";
+import { useNavigate } from "react-router-dom";
 
 
 const FileUpload = () =>{
-
-
+  
+  const navigate = useNavigate();
+  const handleStartConvo = () =>{
+    navigate("/chat")
+  }
+  
   const [file, setFile] = useState<File | null>(null);
 
 
@@ -49,20 +54,12 @@ const FileUpload = () =>{
         formData.append('pdfFile', file);
 
         try {
-            const response = await axios.post('http://localhost:5000/upload', formData, {
+            const response = await axios.post('http://localhost:5000/uploadFile', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
-                },
-                timeout: 10000,
+                }
             });
-
-            toast({
-              title : "File uploaded successfully",
-              description : response.data,
-
-          })
             setLoader(false);
-            modal?.close();
         } catch (error) {
           toast({
             description : 'Failed to Upload !!!',
@@ -118,7 +115,7 @@ const FileUpload = () =>{
         <p className="py-4">The Knowledge Base has been set up successfully</p>
     <div className="modal-action">
       <form method="dialog">
-        <button className="btn">Start the Convo</button>
+        <button onClick={handleStartConvo} className="btn">Start the Convo</button>
       </form>
     </div>
     </>}

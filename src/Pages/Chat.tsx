@@ -59,15 +59,14 @@ const Chat = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("/api/chat", {
-        message: trimmedMessage,
+      const response = await axios.post("http://127.0.0.1:5000/queryRag", {
+        "message": trimmedMessage,
       }, {
-        timeout: 10000,
       });
 
       const botMessage: Message = {
         id: generateId(),
-        text: response.data.reply,
+        text: response.data.response,
         sender: "bot",
         timestamp: new Date(),
       };
@@ -78,7 +77,7 @@ const Chat = () => {
       console.error("Error sending message:", error);
       
       toast({
-        description: 'Failed to send message',
+        description: error.toString(),
         variant: 'destructive'
       });
     } finally {
@@ -111,41 +110,54 @@ const Chat = () => {
           >
             {messages.length > 0 ? (
               <div className="space-y-3 p-4">
-                {messages.map((message) => (
+              {[
+                ...messages,
+                isLoading
+                  ? {
+                      id: "loading",
+                      text: "Analyzing...",
+                      sender: "bot",
+                    }
+                  : null,
+              ]
+                .filter(Boolean) // Remove null if isLoading is false
+                .map((message) => (
                   <div
-                    key={message.id}
+                    key={message?.id}
                     className={`flex items-start gap-2 ${
-                      message.sender === "user"
-                        ? "justify-end" 
-                        : "justify-start"
+                      message?.sender === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    {message.sender === "bot" && (
-                      <BotIcon className="w-6 h-6 mt-2"/>
+                    {message?.sender === "bot" && (
+                      <BotIcon className="w-6 h-6 mt-2" />
                     )}
                     <div
                       className={`p-3 rounded-lg max-w-[75%] ${
-                        message.sender === "user"
-                          ? "bg-primary" 
-                          : "bg-card"
+                        message?.sender === "user"
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-200 text-black"
                       }`}
                     >
-                      {message.text}
+                      {message?.text}
                     </div>
                   </div>
                 ))}
-              </div>
+              <div ref={messagesEndRef} />
+            </div>
             ) : (
               <div className="text-center text-foreground mt-10">
                 Start a conversation
               </div>
             )}
-
-            {isLoading && (
-              <div className="flex justify-start mb-3 p-2">
-                <div className="w-1/2 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+            
+              {/* {isLoading && (
+              <div className="flex items-start gap-2">
+                <BotIcon className="w-6 h-6 mt-2" />
+                <div className="bg-gray-200 text-black p-3 rounded-lg">
+                  Bot is thinking...
+                </div>
               </div>
-            )}
+            )} */}
             <div ref={messagesEndRef} />
           </div>
 
